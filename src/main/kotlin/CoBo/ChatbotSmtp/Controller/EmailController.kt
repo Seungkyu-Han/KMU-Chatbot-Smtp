@@ -32,4 +32,15 @@ class EmailController(
     fun postVerificationCode(@RequestBody emailPostVerificationCodeReq: EmailPostVerificationCodeReq): ResponseEntity<HttpStatus>{
         return emailService.postVerificationCode(emailPostVerificationCodeReq)
     }
+
+    @PostMapping("/verification-code-not")
+    @Operation(summary = "인증번호 전송 API(계명대학교 이메일 아니어도 가능)", description = "해당 이메일로 인증번호를 전송")
+    @ApiResponses(
+        ApiResponse(responseCode = "200", description = "성공", content = arrayOf(Content())),
+        ApiResponse(responseCode = "400", description = "이메일 형식이 올바르지 않습니다.", content = arrayOf(Content())),
+        ApiResponse(responseCode = "501", description = "인증코드 생성 과정에서 오류가 발생했습니다.", content = arrayOf(Content()))
+    )
+    fun postVerificationCodeNot(@RequestBody emailPostVerificationCodeReq: EmailPostVerificationCodeReq): ResponseEntity<HttpStatus>{
+        return emailService.postVerificationCodeNot(emailPostVerificationCodeReq)
+    }
 }
