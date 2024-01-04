@@ -1,5 +1,6 @@
 package CoBo.ChatbotSmtp.Controller
 
+import CoBo.ChatbotSmtp.Data.Dto.Email.Req.EmailPatchVerificationCodeReq
 import CoBo.ChatbotSmtp.Data.Dto.Email.Req.EmailPostVerificationCodeReq
 import CoBo.ChatbotSmtp.Service.EmailService
 import io.swagger.v3.oas.annotations.Operation
@@ -9,10 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import lombok.RequiredArgsConstructor
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequiredArgsConstructor
@@ -42,5 +40,16 @@ class EmailController(
     )
     fun postVerificationCodeNot(@RequestBody emailPostVerificationCodeReq: EmailPostVerificationCodeReq): ResponseEntity<HttpStatus>{
         return emailService.postVerificationCodeNot(emailPostVerificationCodeReq)
+    }
+
+    @PatchMapping("/verification-code")
+    @Operation(summary = "인증번호 확인 API", description = "해당 이메일을 유효성을 확인")
+    @ApiResponses(
+        ApiResponse(responseCode = "200", description = "성공", content = arrayOf(Content())),
+        ApiResponse(responseCode = "401", description = "인증번호가 맞지 않습니다.", content = arrayOf(Content())),
+        ApiResponse(responseCode = "404", description = "요청한 적 없는 이메일입니다.", content = arrayOf(Content()))
+    )
+    fun patchVerificationCode(@RequestBody emailPatchVerificationCodeReq: EmailPatchVerificationCodeReq): ResponseEntity<HttpStatus>{
+        return emailService.patchVerificationCode(emailPatchVerificationCodeReq)
     }
 }
