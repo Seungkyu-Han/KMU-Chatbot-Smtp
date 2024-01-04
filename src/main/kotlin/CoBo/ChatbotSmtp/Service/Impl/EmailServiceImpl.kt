@@ -1,5 +1,6 @@
 package CoBo.ChatbotSmtp.Service.Impl
 
+import CoBo.ChatbotSmtp.Data.Dto.Email.Req.EmailPatchVerificationCodeReq
 import CoBo.ChatbotSmtp.Data.Dto.Email.Req.EmailPostVerificationCodeReq
 import CoBo.ChatbotSmtp.Data.Entity.ValidEmail
 import CoBo.ChatbotSmtp.Repository.ValidEmailRepository
@@ -80,6 +81,19 @@ class EmailServiceImpl(
             code = code,
             isValid = false
         ))
+
+        return ResponseEntity(HttpStatus.OK)
+    }
+
+    override fun patchVerificationCode(emailPatchVerificationCodeReq: EmailPatchVerificationCodeReq): ResponseEntity<HttpStatus> {
+        val validEmail:ValidEmail = validEmailRepository.findById(emailPatchVerificationCodeReq.email).get()
+
+        if(validEmail.code != emailPatchVerificationCodeReq.code)
+            return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        validEmail.isValid = true
+
+        validEmailRepository.save(validEmail)
 
         return ResponseEntity(HttpStatus.OK)
     }
