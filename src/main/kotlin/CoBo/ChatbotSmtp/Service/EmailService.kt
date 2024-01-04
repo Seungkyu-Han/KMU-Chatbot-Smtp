@@ -7,4 +7,6 @@ import org.springframework.http.ResponseEntity
 interface EmailService {
 
     fun postVerificationCode(emailPostVerificationCodeReq: EmailPostVerificationCodeReq): ResponseEntity<HttpStatus>
+
+    fun postVerificationCodeNot(emailPostVerificationCodeReq: EmailPostVerificationCodeReq): ResponseEntity<HttpStatus>
 }

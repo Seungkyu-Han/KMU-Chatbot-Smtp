@@ -57,6 +57,33 @@ class EmailServiceImpl(
         return ResponseEntity(HttpStatus.OK)
     }
 
+    override fun postVerificationCodeNot(emailPostVerificationCodeReq: EmailPostVerificationCodeReq): ResponseEntity<HttpStatus> {
+
+        val splitEmail = emailPostVerificationCodeReq.email.split("@")
+
+        if(splitEmail.size != 2)
+            return ResponseEntity(HttpStatus.BAD_REQUEST)
+
+        val code = verificationCode(emailPostVerificationCodeReq.email)
+
+        val mimeMessage = javaMailSender.createMimeMessage()
+        val helper = MimeMessageHelper(mimeMessage, true, "UTF-8")
+
+        helper.setTo(emailPostVerificationCodeReq.email)
+        helper.setSubject("인증번호다")
+        helper.setText("인증번호 이거다: $code")
+
+        javaMailSender.send(mimeMessage)
+
+        validEmailRepository.save(ValidEmail(
+            email = emailPostVerificationCodeReq.email,
+            code = code,
+            isValid = false
+        ))
+
+        return ResponseEntity(HttpStatus.OK)
+    }
+
     fun verificationCode(email: String): String {
         return try {
             val now = LocalDateTime.now()
