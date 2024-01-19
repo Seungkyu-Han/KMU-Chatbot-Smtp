@@ -14,4 +14,9 @@ class EmailExceptionHandler {
     fun emailNoSuchAlgorithmExceptionHandler(): ResponseEntity<String>{
         return ResponseEntity("인증코드 생성 과정에서 오류가 발생했습니다.", HttpStatus.NOT_IMPLEMENTED)
     }
+
+    @ExceptionHandler(NoSuchElementException::class)
+    fun emailNullPointerExceptionHandler(): ResponseEntity<String>{
+        return ResponseEntity("없는 정보입니다.", HttpStatus.NOT_FOUND)
+    }
 }
