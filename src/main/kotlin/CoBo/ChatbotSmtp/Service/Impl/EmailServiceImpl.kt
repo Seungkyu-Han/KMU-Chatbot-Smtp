@@ -46,6 +46,7 @@ class EmailServiceImpl(
         helper.setTo(emailPostVerificationCodeReq.email)
         helper.setSubject("계명대학교 챗봇 인증번호입니다.")
         helper.setText(mailContent(code), true)
+        helper.setFrom("크무톡톡 <kmutoktok@gmail.com>")
 
         javaMailSender.send(mimeMessage)
 
@@ -73,6 +74,7 @@ class EmailServiceImpl(
         helper.setTo(emailPostVerificationCodeReq.email)
         helper.setSubject("계명대학교 챗봇 인증번호입니다.")
         helper.setText(mailContent(code), true)
+        helper.setFrom("크무톡톡 <kmutoktok@gmail.com>")
 
         javaMailSender.send(mimeMessage)
 
