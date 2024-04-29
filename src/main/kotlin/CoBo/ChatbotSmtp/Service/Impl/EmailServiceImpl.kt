@@ -16,6 +16,7 @@ import java.security.NoSuchAlgorithmException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.math.abs
 
 
 @Service
@@ -46,6 +47,7 @@ class EmailServiceImpl(
         helper.setTo(emailPostVerificationCodeReq.email)
         helper.setSubject("계명대학교 챗봇 인증번호입니다.")
         helper.setText(mailContent(code), true)
+        helper.setFrom("크무톡톡 <kmutoktok@gmail.com>")
 
         javaMailSender.send(mimeMessage)
 
@@ -73,6 +75,7 @@ class EmailServiceImpl(
         helper.setTo(emailPostVerificationCodeReq.email)
         helper.setSubject("계명대학교 챗봇 인증번호입니다.")
         helper.setText(mailContent(code), true)
+        helper.setFrom("크무톡톡 <kmutoktok@gmail.com>")
 
         javaMailSender.send(mimeMessage)
 
@@ -222,8 +225,8 @@ class EmailServiceImpl(
             val messageDigest: MessageDigest = MessageDigest.getInstance("SHA-256")
             val hashBytes: ByteArray = messageDigest.digest(combinedBytes)
             val stringBuilder = StringBuilder()
-            for (hashByte in hashBytes) stringBuilder.append(String.format("%02x", hashByte))
-            stringBuilder.substring(0, 8).uppercase(Locale.getDefault())
+            for (hashByte in hashBytes) stringBuilder.append(abs(hashByte % 10))
+            stringBuilder.substring(0, 6)
         } catch (e: NoSuchAlgorithmException) {
             throw NoSuchAlgorithmException(e)
         }
