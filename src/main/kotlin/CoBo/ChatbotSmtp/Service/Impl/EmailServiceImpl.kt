@@ -28,6 +28,7 @@ class EmailServiceImpl(
 
     val javaMailSender: JavaMailSender
     ):EmailService {
+    val emailLast = kmuEmailAddress.split(",")
 
     override fun postVerificationCode(emailPostVerificationCodeReq: EmailPostVerificationCodeReq): ResponseEntity<HttpStatus> {
 
@@ -36,7 +37,7 @@ class EmailServiceImpl(
         if(splitEmail.size != 2)
             return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if(splitEmail.last() != kmuEmailAddress)
+        if(!emailLast.contains(splitEmail.last()))
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val code = verificationCode(emailPostVerificationCodeReq.email)
