@@ -28,15 +28,19 @@ class EmailServiceImpl(
 
     val javaMailSender: JavaMailSender
     ):EmailService {
+        val addressList = listOf("sdfas", "asdfs")
+
+
 
     override fun postVerificationCode(emailPostVerificationCodeReq: EmailPostVerificationCodeReq): ResponseEntity<HttpStatus> {
 
         val splitEmail = emailPostVerificationCodeReq.email.split("@")
+        val emailLast = kmuEmailAddress.split(",")
 
         if(splitEmail.size != 2)
             return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if(splitEmail.last() != kmuEmailAddress)
+        if(!emailLast.contains(splitEmail.last()))
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val code = verificationCode(emailPostVerificationCodeReq.email)
