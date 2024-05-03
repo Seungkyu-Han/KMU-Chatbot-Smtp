@@ -3,6 +3,7 @@ package CoBo.ChatbotSmtp.Service.Impl
 import CoBo.ChatbotSmtp.Data.Dto.Email.Req.EmailPatchVerificationCodeReq
 import CoBo.ChatbotSmtp.Data.Dto.Email.Req.EmailPostVerificationCodeReq
 import CoBo.ChatbotSmtp.Data.Entity.ValidEmail
+import CoBo.ChatbotSmtp.Repository.UserRepository
 import CoBo.ChatbotSmtp.Repository.ValidEmailRepository
 import CoBo.ChatbotSmtp.Service.EmailService
 import org.springframework.beans.factory.annotation.Value
@@ -22,7 +23,7 @@ import kotlin.math.abs
 @Service
 class EmailServiceImpl(
     val validEmailRepository: ValidEmailRepository,
-
+    val userRepository: UserRepository,
     @Value("\${kmu.mail.address}")
     val kmuEmailAddress: String,
 
@@ -36,6 +37,9 @@ class EmailServiceImpl(
 
         if(splitEmail.size != 2)
             return ResponseEntity(HttpStatus.BAD_REQUEST)
+
+        if(userRepository.existsByEmail(emailPostVerificationCodeReq.email))
+            return ResponseEntity(HttpStatus.CONFLICT)
 
         if(!emailLast.contains(splitEmail.last()))
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
