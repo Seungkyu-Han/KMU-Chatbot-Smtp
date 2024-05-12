@@ -42,6 +42,16 @@ class EmailController(
         return emailService.postVerificationCodeNot(emailPostVerificationCodeReq)
     }
 
+    @GetMapping("/check")
+    @Operation(summary = "인증번호 가능 체크 API")
+    @ApiResponses(
+        ApiResponse(responseCode = "200", description = "가능"),
+        ApiResponse(responseCode = "400", description = "불가능")
+    )
+    fun getCheck(): ResponseEntity<HttpStatus>{
+        return emailService.getCheck()
+    }
+
     @PatchMapping("/verification-code")
     @Operation(summary = "인증번호 확인 API", description = "해당 이메일을 유효성을 확인")
     @ApiResponses(
