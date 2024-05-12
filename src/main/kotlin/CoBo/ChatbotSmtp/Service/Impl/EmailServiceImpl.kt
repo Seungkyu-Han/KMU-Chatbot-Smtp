@@ -14,6 +14,7 @@ import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -30,6 +31,9 @@ class EmailServiceImpl(
     val javaMailSender: JavaMailSender
     ):EmailService {
     val emailLast = kmuEmailAddress.split(",")
+
+    var flag = 0
+    var lastCheck: LocalDate = LocalDate.now()
 
     override fun postVerificationCode(emailPostVerificationCodeReq: EmailPostVerificationCodeReq): ResponseEntity<HttpStatus> {
 
@@ -55,6 +59,8 @@ class EmailServiceImpl(
         helper.setFrom("크무톡톡 <kmutoktok@gmail.com>")
 
         javaMailSender.send(mimeMessage)
+
+        flag += 1
 
         validEmailRepository.save(ValidEmail(
             email = emailPostVerificationCodeReq.email,
@@ -84,6 +90,8 @@ class EmailServiceImpl(
 
         javaMailSender.send(mimeMessage)
 
+        flag += 1
+
         validEmailRepository.save(ValidEmail(
             email = emailPostVerificationCodeReq.email,
             code = code,
@@ -104,6 +112,18 @@ class EmailServiceImpl(
         validEmailRepository.save(validEmail)
 
         return ResponseEntity(HttpStatus.OK)
+    }
+
+    override fun getCheck(): ResponseEntity<HttpStatus> {
+        if (lastCheck != LocalDate.now()){
+            flag = 0
+            lastCheck = LocalDate.now()
+        }
+        return if (flag > 450){
+            ResponseEntity(HttpStatus.BAD_REQUEST)
+        } else{
+            ResponseEntity(HttpStatus.OK)
+        }
     }
 
     private fun mailContent(code: String): String{

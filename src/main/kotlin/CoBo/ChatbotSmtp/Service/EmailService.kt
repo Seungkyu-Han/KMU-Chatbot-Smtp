@@ -12,4 +12,5 @@ interface EmailService {
     fun postVerificationCodeNot(emailPostVerificationCodeReq: EmailPostVerificationCodeReq): ResponseEntity<HttpStatus>
 
     fun patchVerificationCode(emailPatchVerificationCodeReq: EmailPatchVerificationCodeReq): ResponseEntity<HttpStatus>
+    fun getCheck(): ResponseEntity<HttpStatus>
 }
