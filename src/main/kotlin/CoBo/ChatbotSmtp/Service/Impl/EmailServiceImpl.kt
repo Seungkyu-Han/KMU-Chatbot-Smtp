@@ -55,6 +55,8 @@ class EmailServiceImpl(
 
         val code = verificationCode(emailPostVerificationCodeReq.email)
 
+        println("SEND EMAIL: ${emailPostVerificationCodeReq.email}, CODE: $code, TIME: ${LocalDateTime.now()}")
+
         val mimeMessage = javaMailSender.createMimeMessage()
         val helper = MimeMessageHelper(mimeMessage, true, "UTF-8")
 
