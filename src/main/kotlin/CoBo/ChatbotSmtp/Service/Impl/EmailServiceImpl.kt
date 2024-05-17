@@ -9,15 +9,18 @@ import CoBo.ChatbotSmtp.Service.EmailService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.mail.MailSendException
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 
@@ -32,8 +35,10 @@ class EmailServiceImpl(
     ):EmailService {
     val emailLast = kmuEmailAddress.split(",")
 
-    var flag = 0
-    var lastCheck: LocalDate = LocalDate.now()
+    private val scheduler: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
+
+    @Volatile
+    private var flag: Boolean = true
 
     override fun postVerificationCode(emailPostVerificationCodeReq: EmailPostVerificationCodeReq): ResponseEntity<HttpStatus> {
 
@@ -58,9 +63,14 @@ class EmailServiceImpl(
         helper.setText(mailContent(code), true)
         helper.setFrom("크무톡톡 <kmutoktok@gmail.com>")
 
-        javaMailSender.send(mimeMessage)
-
-        flag += 1
+        try{
+            javaMailSender.send(mimeMessage)
+        }catch (mailSendException: MailSendException){
+            flag = false
+            scheduler.schedule({
+                flag = true
+            }, 1, TimeUnit.DAYS)
+        }
 
         validEmailRepository.save(ValidEmail(
             email = emailPostVerificationCodeReq.email,
@@ -88,9 +98,14 @@ class EmailServiceImpl(
         helper.setText(mailContent(code), true)
         helper.setFrom("크무톡톡 <kmutoktok@gmail.com>")
 
-        javaMailSender.send(mimeMessage)
-
-        flag += 1
+        try{
+            javaMailSender.send(mimeMessage)
+        }catch (mailSendException: MailSendException){
+            flag = false
+            scheduler.schedule({
+                flag = true
+            }, 1, TimeUnit.DAYS)
+        }
 
         validEmailRepository.save(ValidEmail(
             email = emailPostVerificationCodeReq.email,
@@ -115,15 +130,10 @@ class EmailServiceImpl(
     }
 
     override fun getCheck(): ResponseEntity<HttpStatus> {
-        if (lastCheck != LocalDate.now()){
-            flag = 0
-            lastCheck = LocalDate.now()
-        }
-        return if (flag > 450){
-            ResponseEntity(HttpStatus.BAD_REQUEST)
-        } else{
+        return if(flag)
             ResponseEntity(HttpStatus.OK)
-        }
+        else
+            ResponseEntity(HttpStatus.BAD_REQUEST)
     }
 
     private fun mailContent(code: String): String{
