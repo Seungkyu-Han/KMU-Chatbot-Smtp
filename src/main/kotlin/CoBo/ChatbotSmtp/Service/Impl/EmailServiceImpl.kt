@@ -72,7 +72,7 @@ class EmailServiceImpl(
             }, 1, TimeUnit.DAYS)
         }
 
-        println("SEND EMAIL: ${emailPostVerificationCodeReq.email}, CODE: $code")
+        println("SEND EMAIL: ${emailPostVerificationCodeReq.email}, CODE: $code, TIME: ${LocalDateTime.now()}")
 
         validEmailRepository.save(ValidEmail(
             email = emailPostVerificationCodeReq.email,
