@@ -55,6 +55,8 @@ class EmailServiceImpl(
 
         val code = verificationCode(emailPostVerificationCodeReq.email)
 
+        println("SEND EMAIL: ${emailPostVerificationCodeReq.email}, CODE: $code, TIME: ${LocalDateTime.now()}")
+
         val mimeMessage = javaMailSender.createMimeMessage()
         val helper = MimeMessageHelper(mimeMessage, true, "UTF-8")
 
@@ -72,7 +74,8 @@ class EmailServiceImpl(
             }, 1, TimeUnit.DAYS)
         }
 
-        println("SEND EMAIL: ${emailPostVerificationCodeReq.email}, CODE: $code")
+        println("SEND EMAIL: ${emailPostVerificationCodeReq.email}, CODE: $code, TIME: ${LocalDateTime.now()}")
+        println()
 
         validEmailRepository.save(ValidEmail(
             email = emailPostVerificationCodeReq.email,
