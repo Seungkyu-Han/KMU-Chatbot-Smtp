@@ -55,7 +55,7 @@ class EmailServiceImpl(
 
         val code = verificationCode(emailPostVerificationCodeReq.email)
 
-        println("SEND EMAIL: ${emailPostVerificationCodeReq.email}, CODE: $code, TIME: ${LocalDateTime.now()}")
+        println("REQUEST EMAIL: ${emailPostVerificationCodeReq.email}, CODE: $code, TIME: ${LocalDateTime.now()}")
 
         val mimeMessage = javaMailSender.createMimeMessage()
         val helper = MimeMessageHelper(mimeMessage, true, "UTF-8")
@@ -72,6 +72,8 @@ class EmailServiceImpl(
             scheduler.schedule({
                 flag = true
             }, 1, TimeUnit.DAYS)
+            println("FAIL TO SEND EMAIL: ${emailPostVerificationCodeReq.email}, CODE: $code, TIME: ${LocalDateTime.now()}")
+            return ResponseEntity(HttpStatus.BAD_GATEWAY)
         }
 
         println("SEND EMAIL: ${emailPostVerificationCodeReq.email}, CODE: $code, TIME: ${LocalDateTime.now()}")
