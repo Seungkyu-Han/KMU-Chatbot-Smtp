@@ -62,4 +62,22 @@ class EmailController(
     fun patchVerificationCode(@RequestBody emailPatchVerificationCodeReq: EmailPatchVerificationCodeReq): ResponseEntity<HttpStatus>{
         return emailService.patchVerificationCode(emailPatchVerificationCodeReq)
     }
+
+    @PostMapping("/register")
+    @Operation(summary = "메일 전송 API", description = "가입 후 메일 전송, 계명대학교 메일만 가능")
+    @ApiResponses(
+        ApiResponse(responseCode = "200", description = "성공", content = arrayOf(Content()))
+    )
+    fun register(@RequestBody emailPostVerificationCodeReq: EmailPostVerificationCodeReq): ResponseEntity<HttpStatus> {
+        return emailService.register(emailPostVerificationCodeReq)
+    }
+
+    @PostMapping("/register-not")
+    @Operation(summary = "메일 전송 API", description = "가입 후 메일 전송")
+    @ApiResponses(
+        ApiResponse(responseCode = "200", description = "성공", content = arrayOf(Content()))
+    )
+    fun registerNot(@RequestBody emailPostVerificationCodeReq: EmailPostVerificationCodeReq): ResponseEntity<HttpStatus> {
+        return emailService.registerNot(emailPostVerificationCodeReq)
+    }
 }

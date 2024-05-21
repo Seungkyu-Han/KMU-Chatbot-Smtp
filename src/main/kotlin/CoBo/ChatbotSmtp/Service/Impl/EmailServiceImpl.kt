@@ -143,118 +143,122 @@ class EmailServiceImpl(
             ResponseEntity(HttpStatus.BAD_REQUEST)
     }
 
+    override fun register(emailPostVerificationCodeReq: EmailPostVerificationCodeReq): ResponseEntity<HttpStatus> {
+        val splitEmail = emailPostVerificationCodeReq.email.split("@")
+
+        if(splitEmail.size != 2)
+            return ResponseEntity(HttpStatus.BAD_REQUEST)
+
+        if(userRepository.existsByEmail(emailPostVerificationCodeReq.email))
+            return ResponseEntity(HttpStatus.CONFLICT)
+
+        if(!emailLast.contains(splitEmail.last()))
+            return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        val code = verificationCode(emailPostVerificationCodeReq.email)
+
+        println("REQUEST EMAIL: ${emailPostVerificationCodeReq.email}, CODE: $code, TIME: ${LocalDateTime.now()}")
+
+        val mimeMessage = javaMailSender.createMimeMessage()
+        val helper = MimeMessageHelper(mimeMessage, true, "UTF-8")
+
+        helper.setTo(emailPostVerificationCodeReq.email)
+        helper.setSubject("크무톡톡 가입 확인 메일입니다.")
+        helper.setText(mailContent(code), true)
+        helper.setFrom("크무톡톡 <kmutoktok@gmail.com>")
+
+        try{
+            javaMailSender.send(mimeMessage)
+        }catch (mailSendException: MailSendException){
+            flag = false
+            scheduler.schedule({
+                flag = true
+            }, 1, TimeUnit.DAYS)
+            println("FAIL TO SEND EMAIL: ${emailPostVerificationCodeReq.email}, CODE: $code, TIME: ${LocalDateTime.now()}")
+            return ResponseEntity(HttpStatus.BAD_GATEWAY)
+        }
+
+        println("SEND EMAIL: ${emailPostVerificationCodeReq.email}, CODE: $code, TIME: ${LocalDateTime.now()}")
+        println()
+
+
+        return ResponseEntity(HttpStatus.OK)
+    }
+
+    override fun registerNot(emailPostVerificationCodeReq: EmailPostVerificationCodeReq): ResponseEntity<HttpStatus> {
+        val splitEmail = emailPostVerificationCodeReq.email.split("@")
+
+        if(splitEmail.size != 2)
+            return ResponseEntity(HttpStatus.BAD_REQUEST)
+
+        val code = verificationCode(emailPostVerificationCodeReq.email)
+
+        val mimeMessage = javaMailSender.createMimeMessage()
+        val helper = MimeMessageHelper(mimeMessage, true, "UTF-8")
+
+        helper.setTo(emailPostVerificationCodeReq.email)
+        helper.setSubject("계명대학교 챗봇 가입 확인 메일입니다.")
+        helper.setText(mailContent(code), true)
+        helper.setFrom("크무톡톡 <kmutoktok@gmail.com>")
+
+        try{
+            javaMailSender.send(mimeMessage)
+        }catch (mailSendException: MailSendException){
+            flag = false
+            scheduler.schedule({
+                flag = true
+            }, 1, TimeUnit.DAYS)
+        }
+
+        return ResponseEntity(HttpStatus.OK)
+    }
+
     private fun mailContent(code: String): String{
-        return "<!DOCTYPE html>\n" +
-                "<html lang=\"en\">\n" +
-                "<head>\n" +
-                "    <meta charset=\"UTF-8\">\n" +
-                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
-                "    <title>Frame 9</title>\n" +
-                "    <link href=\"style.css\" rel=\"stylesheet\">\n" +
-                "    <style>\n" +
-                "        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap');\n" +
-                "\n" +
-                "        body {\n" +
-                "            font-family: \"Noto Sans KR\", sans-serif;\n" +
-                "        }\n" +
-                "\n" +
-                "        #Frame-9 {\n" +
-                "            box-sizing: border-box;\n" +
-                "            width: 100%; height: 292px;\n" +
-                "            max-width: 580px;\n" +
-                "            background-color: #FFFFFF;\n" +
-                "            padding: 40px;\n" +
-                "        }\n" +
-                "\n" +
-                "        #text-1 {\n" +
-                "            margin: 0;\n" +
-                "            margin-bottom: 24px;\n" +
-                "            font-weight: 400;\n" +
-                "            font-size: 26px;\n" +
-                "            color: #000000;\n" +
-                "            line-height: 30px;\n" +
-                "            letter-spacing: -0.025em;\n" +
-                "        }\n" +
-                "\n" +
-                "        #Frame-9 > hr {\n" +
-                "            margin: 0;\n" +
-                "            border: 0;\n" +
-                "            border-bottom: 1px #E6E8EB solid;\n" +
-                "        }\n" +
-                "\n" +
-                "        #text-2 {\n" +
-                "            margin: 0;\n" +
-                "            margin-top: 39px; margin-bottom: 20px;\n" +
-                "            font-weight: 400;\n" +
-                "            font-size: 14px;\n" +
-                "\n" +
-                "            color: #606060;\n" +
-                "            line-height: 18px;\n" +
-                "            letter-spacing: -0.025em;\n" +
-                "        }\n" +
-                "\n" +
-                "        #text-number {\n" +
-                "            box-sizing: border-box;\n" +
-                "            display: inline-block;\n" +
-                "            margin: 0;\n" +
-                "            padding: 14px 11px 14px 18px;\n" +
-                "            \n" +
-                "            border-radius: 6px;\n" +
-                "            background-color: #E6E8EB;\n" +
-                "            font-weight: 400;\n" +
-                "            font-size: 26px;\n" +
-                "\n" +
-                "            color: #001832;\n" +
-                "            line-height: 26px;\n" +
-                "            letter-spacing: 7px;\n" +
-                "        }\n" +
-                "\n" +
-                "        @media screen and (max-width: 425px) {\n" +
-                "            #Frame-9 {\n" +
-                "                width: 100%; height: 240px;\n" +
-                "                max-width: 345px;\n" +
-                "                padding: 27px;\n" +
-                "            }\n" +
-                "\n" +
-                "            #text-1 {\n" +
-                "                margin-bottom: 20px;\n" +
-                "                font-size: 18px;\n" +
-                "                line-height: 24px;\n" +
-                "            }\n" +
-                "\n" +
-                "            #Frame-9 > hr {\n" +
-                "                max-width: 290px;\n" +
-                "            }\n" +
-                "\n" +
-                "            #text-2 {\n" +
-                "                margin-top: 50px; margin-bottom: 16px;\n" +
-                "                font-size: 12px;\n" +
-                "                line-height: 16px;\n" +
-                "            }\n" +
-                "\n" +
-                "            #text-number {\n" +
-                "                padding: 7px 9px 7px 18px;\n" +
-                "                \n" +
-                "                font-size: 20px;\n" +
-                "\n" +
-                "                line-height: 28px;\n" +
-                "                letter-spacing: 9px;\n" +
-                "            }\n" +
-                "        }\n" +
-                "    </style>\n" +
-                "</head>\n" +
-                "<body>\n" +
-                "    <div id=\"Frame-9\">\n" +
-                "        <p id=\"text-1\">인증번호를 보내드립니다.</p>\n" +
-                "        <hr>\n" +
-                "        <p id=\"text-2\">\n" +
-                "            본인 확인을 위한 인증번호입니다.<br>\n" +
-                "            서비스로 돌아가서 아래 6개의 숫자를 입력해주세요.\n" +
-                "        </p>\n" +
-                "        <p id=\"text-number\">$code</p>\n" +
-                "    </div>\n" +
-                "</body>\n" +
-                "</html>"
+        return """
+                <!DOCTYPE html>
+                    <html>
+                        <head>
+                        <meta charset="utf-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>가입 완료 메일</title>
+                        <style>
+                                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap');
+                        body {
+                            font-family: "Noto Sans KR", sans-serif;
+                        }
+                            .main-content{
+                            box-sizing: border-box;
+                            width: 100%;
+                            max-width: 580px;
+                            padding: 40px;
+                        }
+                            .text1{
+                                font-size: 26px;
+                                color: #000;
+                            }
+                            .text2{
+                                font-size: 14px;
+                                color: #606060;
+                                margin-top: 30px;
+                            }
+                        hr{
+                            margin: 0;
+                            border: 0;
+                            border-bottom: 2px #E6E8EB solid;
+                        }
+                        </style>
+                        </head>
+                        <body>
+                        <div class="main-content">
+                        <p class="text1">가입이 완료되었습니다!</p>
+                        <hr>
+                        <p class="text2">
+                        안녕하세요, 크무톡톡입니다.<br/>회원가입이 완료되어 이제부터 크무톡톡에서 궁금한 것을 질문할 수 있게 되었어요!
+                        </p>
+                        </div>
+                        </body>
+                    </html>
+                   """
     }
 
     fun verificationCode(email: String): String {
