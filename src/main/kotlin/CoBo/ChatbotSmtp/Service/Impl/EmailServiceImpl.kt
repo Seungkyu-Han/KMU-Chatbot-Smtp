@@ -62,7 +62,7 @@ class EmailServiceImpl(
 
         helper.setTo(emailPostVerificationCodeReq.email)
         helper.setSubject("계명대학교 챗봇 인증번호입니다.")
-        helper.setText(mailContent(code), true)
+        helper.setText(mailContent(), true)
         helper.setFrom("크무톡톡 <kmutoktok@gmail.com>")
 
         try{
@@ -102,7 +102,7 @@ class EmailServiceImpl(
 
         helper.setTo(emailPostVerificationCodeReq.email)
         helper.setSubject("계명대학교 챗봇 인증번호입니다.")
-        helper.setText(mailContent(code), true)
+        helper.setText(mailContent(), true)
         helper.setFrom("크무톡톡 <kmutoktok@gmail.com>")
 
         try{
@@ -164,7 +164,7 @@ class EmailServiceImpl(
 
         helper.setTo(emailPostVerificationCodeReq.email)
         helper.setSubject("크무톡톡 가입 확인 메일입니다.")
-        helper.setText(mailContent(code), true)
+        helper.setText(mailContent(), true)
         helper.setFrom("크무톡톡 <kmutoktok@gmail.com>")
 
         try{
@@ -193,12 +193,14 @@ class EmailServiceImpl(
 
         val code = verificationCode(emailPostVerificationCodeReq.email)
 
+        println("REQUEST EMAIL: ${emailPostVerificationCodeReq.email}, CODE: $code, TIME: ${LocalDateTime.now()}")
+
         val mimeMessage = javaMailSender.createMimeMessage()
         val helper = MimeMessageHelper(mimeMessage, true, "UTF-8")
 
         helper.setTo(emailPostVerificationCodeReq.email)
         helper.setSubject("계명대학교 챗봇 가입 확인 메일입니다.")
-        helper.setText(mailContent(code), true)
+        helper.setText(mailContent(), true)
         helper.setFrom("크무톡톡 <kmutoktok@gmail.com>")
 
         try{
@@ -208,12 +210,17 @@ class EmailServiceImpl(
             scheduler.schedule({
                 flag = true
             }, 1, TimeUnit.DAYS)
+            println("FAIL TO SEND EMAIL: ${emailPostVerificationCodeReq.email}, CODE: $code, TIME: ${LocalDateTime.now()}")
+            return ResponseEntity(HttpStatus.BAD_GATEWAY)
         }
+
+        println("SEND EMAIL: ${emailPostVerificationCodeReq.email}, CODE: $code, TIME: ${LocalDateTime.now()}")
+        println()
 
         return ResponseEntity(HttpStatus.OK)
     }
 
-    private fun mailContent(code: String): String{
+    private fun mailContent(): String{
         return """
                 <!DOCTYPE html>
                     <html>
