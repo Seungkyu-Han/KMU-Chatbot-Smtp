@@ -149,9 +149,6 @@ class EmailServiceImpl(
         if(splitEmail.size != 2)
             return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if(userRepository.existsByEmail(emailPostVerificationCodeReq.email))
-            return ResponseEntity(HttpStatus.CONFLICT)
-
         if(!emailLast.contains(splitEmail.last()))
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
